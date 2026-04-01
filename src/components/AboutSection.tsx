@@ -45,7 +45,7 @@ export default function AboutSection() {
           </h2>
           <p className="font-jakarta text-[#1A1A2E]/60 text-lg leading-relaxed mb-8">
             I'm a passionate graphic designer specializing in YouTube thumbnails 
-            and visual branding for content creators. Over the past 5 years, I've 
+            and visual branding for content creators. Over the past 3 years, I've 
             helped 200+ YouTubers grow their channels through strategic, eye-catching 
             design. My work sits at the intersection of psychology and aesthetics — 
             every design is built to convert.
