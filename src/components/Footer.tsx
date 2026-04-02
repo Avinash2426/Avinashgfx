@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FaDiscord } from "react-icons/fa";
 import { Instagram, Twitter, ArrowRight, Sparkles } from "lucide-react";
+import { useForm, ValidationError } from "@formspree/react";
+import { useEffect } from "react";
 
 const navLinks = [
   { label: "Home", href: "#home" },
@@ -118,16 +120,17 @@ export default function Footer() {
 }
 
 function ContactModal({ onClose }: { onClose: () => void }) {
-  const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", channel: "", message: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
+const [state, handleSubmit] = useForm("mgopzllr"); // 👈 apna Form ID
+
+useEffect(() => {
+  if (state.succeeded) {
     setTimeout(() => {
       onClose();
     }, 2500);
-  };
+  }
+}, [state.succeeded, onClose]);
+
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -136,7 +139,7 @@ function ContactModal({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       />
       <div className="relative bg-white rounded-2xl p-8 w-full max-w-lg z-10 shadow-2xl">
-        {submitted ? (
+        {state.succeeded ? (
           <div className="text-center py-8">
             <div className="w-16 h-16 rounded-full gradient-pink flex items-center justify-center mx-auto mb-4">
               <span className="text-white text-3xl">✓</span>
@@ -156,6 +159,11 @@ function ContactModal({ onClose }: { onClose: () => void }) {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <input 
+    type="hidden" 
+    name="formType" 
+    value="Contact Form"
+  />
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="font-jakarta text-xs font-medium text-[#1A1A2E]/60 uppercase tracking-wider block mb-1">
@@ -163,8 +171,7 @@ function ContactModal({ onClose }: { onClose: () => void }) {
                   </label>
                   <input
                     required
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    name="name"
                     className="w-full border border-[#1A1A2E]/10 rounded-xl px-4 py-3 font-jakarta text-sm text-[#1A1A2E] focus:outline-none focus:border-[#FF0080] focus:ring-2 focus:ring-[#FF0080]/20 transition-all"
                     placeholder="Your name"
                   />
@@ -175,23 +182,24 @@ function ContactModal({ onClose }: { onClose: () => void }) {
                   </label>
                   <input
                     required
+                    name="email"
                     type="email"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+  
                     className="w-full border border-[#1A1A2E]/10 rounded-xl px-4 py-3 font-jakarta text-sm text-[#1A1A2E] focus:outline-none focus:border-[#FF0080] focus:ring-2 focus:ring-[#FF0080]/20 transition-all"
                     placeholder="your@email.com"
                   />
+                  <ValidationError prefix="Email" field="email" errors={state.errors} />
                 </div>
               </div>
               <div>
-                <label className="font-jakarta text-xs font-medium text-[#1A1A2E]/60 uppercase tracking-wider block mb-1">
+                <label className="font-jakarta text-xs font-medium text-[#1A1A2E]/60 uppercase tracking-wider block mb-1" >
                   YouTube Channel (optional)
                 </label>
                 <input
-                  value={form.channel}
-                  onChange={(e) => setForm({ ...form, channel: e.target.value })}
+
                   className="w-full border border-[#1A1A2E]/10 rounded-xl px-4 py-3 font-jakarta text-sm text-[#1A1A2E] focus:outline-none focus:border-[#FF0080] focus:ring-2 focus:ring-[#FF0080]/20 transition-all"
                   placeholder="youtube.com/c/yourchannel"
+                  name="channel"
                 />
               </div>
               <div>
@@ -201,18 +209,19 @@ function ContactModal({ onClose }: { onClose: () => void }) {
                 <textarea
                   required
                   rows={3}
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  name="message"
                   className="w-full border border-[#1A1A2E]/10 rounded-xl px-4 py-3 font-jakarta text-sm text-[#1A1A2E] focus:outline-none focus:border-[#FF0080] focus:ring-2 focus:ring-[#FF0080]/20 transition-all resize-none"
                   placeholder="Tell me about your channel and what you're looking for..."
                 />
+                <ValidationError prefix="Message" field="message" errors={state.errors} />
               </div>
               <button
-                type="submit"
-                className="w-full font-jakarta font-semibold text-white py-4 rounded-xl gradient-pink transition-all duration-250 hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-300/40"
-              >
-                Send Message
-              </button>
+               type="submit"
+               disabled={state.submitting}
+               className="w-full font-jakarta font-semibold text-white py-4 rounded-xl gradient-pink transition-all duration-250 hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-300/40"
+               >
+              {state.submitting ? "Sending..." : "Send Message"}
+            </button>
             </form>
           </>
         )}

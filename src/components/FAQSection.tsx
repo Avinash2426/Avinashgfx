@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { Plus, Minus } from "lucide-react";
+import { useForm, ValidationError } from "@formspree/react";
 
 function useIntersection(ref: React.RefObject<HTMLElement>) {
   const [visible, setVisible] = useState(false);
@@ -38,11 +39,23 @@ const faqs = [
 ];
 
 export default function FAQSection() {
-  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const visible = useIntersection(sectionRef);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [state, handleSubmit] = useForm("mgopzllr");
+
+  useEffect(() => {
+  if (state.succeeded) {
+    setOpenModal(false);
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 3000);
+  }
+}, [state.succeeded]);
   
   const toggle = (i: number) => {
     setOpenIndex(openIndex === i ? null : i);
@@ -159,22 +172,20 @@ export default function FAQSection() {
       </h2>
 
       {/* FORM START */}
-      <form
-         onSubmit={(e) => {
-         e.preventDefault();
-         setOpenModal(false);   // modal बंद
-         setShowSuccess(true);  // popup दिखाओ
-
-         setTimeout(() => {
-         setShowSuccess(false); // 3 sec बाद hide
-         }, 3000);
-        }}
-        className="space-y-4"
-         >
+     <form
+  onSubmit={handleSubmit}
+  className="space-y-4"
+>
+  <input 
+    type="hidden" 
+    name="formType" 
+    value="FAQ Question"
+  />
         <input
           type="text"
           placeholder="Your Name"
           required
+          name="name"
           className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
         />
 
@@ -182,15 +193,27 @@ export default function FAQSection() {
           type="email"
           placeholder="Your Email"
           required
+          name="email"
           className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
         />
+        <ValidationError 
+  prefix="Email" 
+  field="email" 
+  errors={state.errors} 
+/>
 
         <textarea
-          placeholder="Your Message"
+          placeholder="Your Question"
           required
+          name="message"
           rows={4}
           className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
         ></textarea>
+        <ValidationError 
+  prefix="Message" 
+  field="message" 
+  errors={state.errors} 
+/>
 
         <div className="flex justify-between items-center pt-2">
           <button
@@ -201,12 +224,12 @@ export default function FAQSection() {
             Cancel
           </button>
 
-          <button
+        <button
             type="submit"
-            className="bg-pink-500 text-white px-5 py-2 rounded-lg 
-            transition-all duration-200 hover:bg-pink-600 hover:scale-105 active:scale-95"
-          >
-            Send Message
+            disabled={state.submitting}
+            className="bg-pink-500 text-white px-5 py-2 rounded-lg"
+            >
+            {state.submitting ? "Sending..." : "Send Message"}
           </button>
         </div>
       </form>
